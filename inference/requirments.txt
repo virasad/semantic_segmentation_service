@@ -1,0 +1,7 @@
+opencv-python
+pillow
+numpy
+pycocotools
+tqdm
+requests
+torchmetrics
