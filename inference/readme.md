@@ -25,9 +25,9 @@ pip install -r requirements.txt
 ## Send Request
 ```python
 import requests
-image_path = 'test.jpg'
+imagePath = 'test.jpg'
 url = 'http://localhost:8000/predict'
-data = {'image': image_path}
+data = {'imagePath': imagePath}
 r = requests.post(url, data=data)
 print(r.json())
 
