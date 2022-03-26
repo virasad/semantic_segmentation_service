@@ -14,7 +14,7 @@ detector = InferenceSeg(100)
 
 
 class Predict(BaseModel):
-    image_path: str
+    imagePath: str
 
 
 class modelPath(BaseModel):
@@ -33,7 +33,7 @@ def set_model(model_path: modelPath):
 @app.post('/predict/')
 def predict(predict: Predict = None):
     try:
-        image = cv2.imread(predict.image_path, 1)
+        image = cv2.imread(predict.imagePath, 1)
         image = np.moveaxis(image, 2, 0)
         result = detector.predict(image, batch_size=1)
         result = detector.result_to_polygon(result)
