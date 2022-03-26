@@ -38,6 +38,7 @@ class CocoHandler:
         for cat in self.coco.loadCats(self.coco.getCatIds()):
             label_map[cat['id']] = cat['name']
 
+
 def check_dataset(input_data, target_data):
     input_files = os.listdir(input_data)
     target_files = os.listdir(target_data)
@@ -46,7 +47,6 @@ def check_dataset(input_data, target_data):
     if len(all_files) != len(input_files) or len(all_files) != len(target_files):
         print('not equal')
         print(all_files, len(input_files), len(target_files), len(all_files))
-
 
 
 def batch_jpg_to_png(images_path):

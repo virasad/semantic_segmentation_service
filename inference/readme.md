@@ -21,11 +21,27 @@ pip install -r requirements.txt
 ```
 
 # How to run?
-## run from script
 
-```bash
-cd backbone
-uvicorn main:app --reload
+## Send Request
+```python
+import requests
+image_path = 'test.jpg'
+url = 'http://localhost:8000/predict'
+data = {'image': image_path}
+r = requests.post(url, data=data)
+print(r.json())
+
 ```
-## See API doc
-http://127.0.0.1:8000/docs
+## Set Model
+```python
+import requests
+url = 'http://localhost:8000/set_model'
+modelPath = './model/model.pth'
+data = {'modelPath': modelPath}
+r = requests.post(url, data=data)
+print(r.json())
+```
+## Run from command line
+```bash
+python main.py
+```

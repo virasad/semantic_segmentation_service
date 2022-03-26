@@ -7,8 +7,9 @@ import base64
 import flash
 
 
-TEST_IMAGE='/home/amir/anaconda3/envs/deep-gpu/lib/python3.9/site-packages/flash/assets/road.png'
+TEST_IMAGE='road.png'
 DETECTION_URL='http://127.0.0.1:8000/predict'
+
 def send_with_image(image_path,detection_url):
     image_data = open(image_path, "rb").read()
     response = requests.post(detection_url, files={"image": image_data}).json()
@@ -33,6 +34,7 @@ def send_for_flash(image_path= None,detection_url=None):
     resp = requests.post("http://127.0.0.1:8000/predict", json=body)
     print(resp.json())
     # resp = requests.post("http://127.0.0.1:8000/predict", json=body)
+
 if __name__ == '__main__':
     send_for_flash()
     # cv2image = cv2.imread(TEST_IMAGE)

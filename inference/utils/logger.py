@@ -1,6 +1,7 @@
+import json
+import requests
 from pytorch_lightning.loggers.base import LightningLoggerBase, rank_zero_experiment
 from pytorch_lightning.utilities.distributed import rank_zero_only
-import requests, json
 
 
 class ClientLogger(LightningLoggerBase):
@@ -32,7 +33,6 @@ class ClientLogger(LightningLoggerBase):
         metrics['step'] = step
         print(f"Logging metrics: {metrics}")
         requests.post('http://192.168.1.36:8000/train-result', data=json.dumps(metrics))
-
 
     @rank_zero_only
     def save(self):

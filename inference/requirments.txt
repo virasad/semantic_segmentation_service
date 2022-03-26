@@ -5,3 +5,5 @@ pycocotools
 tqdm
 requests
 torchmetrics
+flash
+imantics

@@ -16,8 +16,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 
 import numpy as np
 import torch
-
-import flash
+from PIL import Image
 from flash.core.data.io.input import DataKeys
 from flash.core.data.io.output import Output
 from flash.core.registry import FlashRegistry
@@ -28,7 +27,6 @@ from flash.core.utilities.imports import (
     lazy_import,
     requires,
 )
-from PIL import Image
 from flash.core.utilities.providers import _FIFTYONE
 
 if _FIFTYONE_AVAILABLE:
@@ -39,7 +37,7 @@ else:
     Segmentation = None
 
 if _MATPLOTLIB_AVAILABLE:
-    import matplotlib.pyplot as plt
+    pass
 else:
     plt = None
 
@@ -47,7 +45,6 @@ if _KORNIA_AVAILABLE:
     import kornia as K
 else:
     K = None
-
 
 SEMANTIC_SEGMENTATION_OUTPUTS = FlashRegistry("outputs")
 
@@ -63,11 +60,13 @@ class SegmentationLabelsOutput(Output):
     """
 
     @requires("image")
-    def __init__(self, labels_map: Optional[Dict[int, Tuple[int, int, int]]] = None, visualize: bool = False, return_mask_as_image: bool = False):
+    def __init__(self, labels_map: Optional[Dict[int, Tuple[int, int, int]]] = None, visualize: bool = False,
+                 return_mask_as_image: bool = False, labels_class: bool = True):
         super().__init__()
         self.labels_map = labels_map
         self.visualize = visualize
         self.return_mask_as_image = return_mask_as_image
+        self.labels_class = labels_class
 
     @staticmethod
     def labels_to_image(img_labels: torch.Tensor, labels_map: Dict[int, Tuple[int, int, int]]) -> torch.Tensor:
@@ -81,6 +80,23 @@ class SegmentationLabelsOutput(Output):
             for i in range(3):
                 out[i].masked_fill_(mask, label_val[i])
         return out
+
+    def _label_2_class(self, img_labels):
+        """Function that given an image with labels ids and their pixels intrensity mapping, creates a RGB
+        representation for visualisation purposes."""
+
+        assert len(img_labels.shape) == 2, img_labels.shape
+        classes = []
+        masks = []
+        labels_map = self.labels_map
+        for label_id, label_val in labels_map.items():
+            mask = img_labels == label_id
+            if mask[0][0] == True:
+                mask = mask.tolist()
+                masks.append(mask)
+                classes.append(label_id)
+        m = np.array(masks)
+        return m, classes
 
     @staticmethod
     def create_random_labels_map(num_classes: int) -> Dict[int, Tuple[int, int, int]]:
@@ -98,6 +114,7 @@ class SegmentationLabelsOutput(Output):
         labels_vis.show()
         # plt.imshow(labels_vis)
         # plt.show()
+
     def _get_mask(self, labels):
         labels_vis = self.labels_to_image(labels, self.labels_map)
         labels_vis = K.utils.tensor_to_image(labels_vis)
@@ -108,11 +125,14 @@ class SegmentationLabelsOutput(Output):
         preds = sample[DataKeys.PREDS]
         assert len(preds.shape) == 3, preds.shape
         labels = torch.argmax(preds, dim=-3)  # HxW
-        print("Yes in transform")
         if self.visualize:
             self._visualize(labels)
         if self.return_mask_as_image:
             return self._get_mask(labels)
+
+        if self.labels_class:
+            return self._label_2_class(img_labels=labels)
+
         return labels.tolist()
 
 
@@ -130,10 +150,10 @@ class FiftyOneSegmentationLabelsOutput(SegmentationLabelsOutput):
 
     @requires("fiftyone")
     def __init__(
-        self,
-        labels_map: Optional[Dict[int, Tuple[int, int, int]]] = None,
-        visualize: bool = False,
-        return_filepath: bool = True,
+            self,
+            labels_map: Optional[Dict[int, Tuple[int, int, int]]] = None,
+            visualize: bool = False,
+            return_filepath: bool = True,
     ):
         super().__init__(labels_map=labels_map, visualize=visualize)
 
