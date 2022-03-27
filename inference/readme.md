@@ -25,10 +25,10 @@ pip install -r requirements.txt
 ## Send Request
 ```python
 import requests
-imagePath = 'test.jpg'
+base64image = ''
 url = 'http://localhost:8000/predict'
-data = {'imagePath': imagePath}
-r = requests.post(url, data=data)
+data = {'image': base64image}
+r = requests.post(url, json=data)
 print(r.json())
 
 ```
@@ -36,9 +36,9 @@ print(r.json())
 ```python
 import requests
 url = 'http://localhost:8000/set_model'
-modelPath = './model/model.pth'
-data = {'modelPath': modelPath}
-r = requests.post(url, data=data)
+model_path = './model/model.pth'
+data = {'model_path': model_path}
+r = requests.post(url, json=data)
 print(r.json())
 ```
 ## Run from command line

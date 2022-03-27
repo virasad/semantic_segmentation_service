@@ -77,13 +77,13 @@ class InferenceSeg:
         for i in range(len(m)):
             ia = imantics.Mask(m[i])
             po = list(ia.polygons())
-            re.append({"class_id": classes[i], "polygon": po})
+            re.append({"class_id": classes[i], "polygon": po[0].tolist()})
 
         return re
 
 
 if __name__ == '__main__':
-    model_path = "https://flash-weights.s3.amazonaws.com/0.7.0/semantic_segmentation_model.pt"
+    '''model_path = "https://flash-weights.s3.amazonaws.com/0.7.0/semantic_segmentation_model.pt"
     images_path = 'download.jpg'
     image = cv2.imread(images_path, 1)
     images_path = [
@@ -115,3 +115,4 @@ if __name__ == '__main__':
     cv2.imshow('out', image)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    '''
