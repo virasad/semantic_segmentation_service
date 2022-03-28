@@ -9,12 +9,10 @@ import cv2
 import numpy as np
 import pickle
 
-
-
-
 app = FastAPI()
 detector = None
 detector = InferenceSeg()
+
 
 class Train(BaseModel):
     images: str
@@ -24,14 +22,6 @@ class Train(BaseModel):
     num_dataloader_workers: Optional[int] = None
     epochs: Optional[int] = None
 
-class Predict(BaseModel):
-    image_path: str
-
-
-def im2json(image):
-    """Convert a Numpy array to JSON string"""
-    imdata = pickle.dumps(image)
-    return base64.b64encode(imdata).decode('ascii')
 
 @app.post('/set_model/')
 def set_model(model_path: str = None):
@@ -45,19 +35,9 @@ def set_model(model_path: str = None):
 @app.post("/train/")
 def read_train(train: Train = None):
     try:
-        result = tr.train_from_coco(train.images, train.annotation, train.save_name, train.batch_size, train.num_dataloader_workers, train.epochs)
+        result = tr.train_from_coco(train.images, train.annotation, train.save_name, train.batch_size,
+                                    train.num_dataloader_workers, train.epochs)
         return result
-
-    except Exception as e:
-        return {"result": "failed", 'error': str(e)}
-
-@app.post('/predict/')
-def predict(predict: Predict = None):
-    try:
-        result = detector.detect_add_to_image(predict.image_path)
-        img_str = im2json(result)
-        print(img_str)
-        return {"result": "success", 'image': img_str}
 
     except Exception as e:
         return {"result": "failed", 'error': str(e)}

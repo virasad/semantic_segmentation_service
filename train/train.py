@@ -23,8 +23,8 @@ def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num
                                                   num_workers=num_dataloader_workers)
     # 2. Build the task
     model = SemanticSegmentation(
-        backbone="mobilenetv3_large_100",
-        head="fpn",
+        backbone="deeplabv3plus",
+        head='deeplabv3',
         num_classes=datamodule.num_classes,
         metrics=[IoU(num_classes=datamodule.num_classes),
                  F1(num_classes=datamodule.num_classes, mdmc_average='samplewise'),
@@ -76,6 +76,7 @@ def train_from_coco(images_path, json_annotation_path, save_name, batch_size=4, 
     dataset.CocoHandler(json_annotation_path, images_path).convert_dataset_to_masks(pngmasks_path)
     train_from_images_mask(png_images_path, pngmasks_path, save_name, batch_size, num_dataloader_workers, epochs)
     return {'result': 'success', 'error': ''}
+
 
 if __name__ == '__main__':
     train_from_coco(data_path, labels_json_path, "coco_train")
