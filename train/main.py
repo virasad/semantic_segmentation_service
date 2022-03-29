@@ -37,7 +37,14 @@ def read_train(train: Train = None):
     try:
         result = tr.train_from_coco(train.images, train.annotation, train.save_name, train.batch_size,
                                     train.num_dataloader_workers, train.epochs)
+
+        response_url = os.environ.get('RESPONSE_URL')
+        requests.post(response_url, json={'result': result})
+
         return result
 
     except Exception as e:
         return {"result": "failed", 'error': str(e)}
+
+if __name__ == '__main__':
+    uvicorn.run(app, host='127.0.0.1', port=5000)        

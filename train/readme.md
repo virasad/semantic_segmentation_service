@@ -29,3 +29,7 @@ uvicorn main:app --reload
 ```
 ## See API doc
 http://127.0.0.1:8000/docs
+
+
+## response url
+set `RESPONSE_URL` in environment variables to your response url

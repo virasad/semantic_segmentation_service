@@ -2,9 +2,9 @@ version: "3.8"
 services:
     inference:
         container_name: "semantic-segment-inference"
-        build: "./backbone"
+        build: "./inference"
         ports:
-            - '5000:5000'
+            - '8000:8000'
         command: "python3 main.py"
         deploy:
             resources:
@@ -16,7 +16,7 @@ services:
         container_name: "semantic-segment-train"
         build: "./train"
         ports:
-            - '8000:8000'
+            - '5000:5000'
         command: "python3 main.py"
         deploy:
             resources:
