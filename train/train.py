@@ -37,6 +37,9 @@ def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num
     trainer = flash.Trainer(max_epochs=epochs, logger=logger.ClientLogger(), gpus=torch.cuda.device_count())
     trainer.finetune(model, datamodule=datamodule, strategy="no_freeze")
     trainer.save_checkpoint("{}_model.pt".format(save_name))
+    result = trainer.validate(model, datamodule=datamodule)
+
+    return result[0]
 
 
 def train_from_coco(images_path, json_annotation_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100):
@@ -74,8 +77,8 @@ def train_from_coco(images_path, json_annotation_path, save_name, batch_size=4, 
         os.mkdir(pngmasks_path)
 
     dataset.CocoHandler(json_annotation_path, images_path).convert_dataset_to_masks(pngmasks_path)
-    train_from_images_mask(png_images_path, pngmasks_path, save_name, batch_size, num_dataloader_workers, epochs)
-    return {'result': 'success', 'error': ''}
+    result = train_from_images_mask(png_images_path, pngmasks_path, save_name, batch_size, num_dataloader_workers, epochs)
+    return result
 
 
 if __name__ == '__main__':

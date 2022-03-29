@@ -4,10 +4,9 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import train as tr
 from inference.predict import InferenceSeg
-import base64
-import cv2
-import numpy as np
-import pickle
+import os
+import requests
+import uvicorn
 
 app = FastAPI()
 detector = None
@@ -40,11 +39,11 @@ def read_train(train: Train = None):
 
         response_url = os.environ.get('RESPONSE_URL')
         requests.post(response_url, json={'result': result})
-
         return result
 
     except Exception as e:
         return {"result": "failed", 'error': str(e)}
 
+
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=5000)        
+    uvicorn.run(app, host='127.0.0.1', port=5000)
