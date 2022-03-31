@@ -3,14 +3,11 @@ from typing import Optional
 from fastapi import FastAPI
 from pydantic import BaseModel
 import train as tr
-from inference.predict import InferenceSeg
 import os
 import requests
 import uvicorn
 
 app = FastAPI()
-detector = None
-detector = InferenceSeg()
 
 
 class Train(BaseModel):
@@ -20,15 +17,6 @@ class Train(BaseModel):
     batch_size: Optional[int] = None
     num_dataloader_workers: Optional[int] = None
     epochs: Optional[int] = None
-
-
-@app.post('/set_model/')
-def set_model(model_path: str = None):
-    try:
-        detector.load_model(model_path)
-        return {'status': 'success'}
-    except Exception as e:
-        return {'status': 'error', 'error': str(e)}
 
 
 @app.post("/train/")

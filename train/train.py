@@ -36,7 +36,7 @@ def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num
     # 3. Create the trainer and finetune the model
     trainer = flash.Trainer(max_epochs=epochs, logger=logger.ClientLogger(), gpus=torch.cuda.device_count())
     trainer.finetune(model, datamodule=datamodule, strategy="no_freeze")
-    trainer.save_checkpoint("{}_model.pt".format(save_name))
+    trainer.save_checkpoint("weights/{}_model.pt".format(save_name))
     result = trainer.validate(model, datamodule=datamodule)
 
     return result[0]

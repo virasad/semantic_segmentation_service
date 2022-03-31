@@ -18,6 +18,8 @@ services:
         ports:
             - '5000:5000'
         command: "python3 main.py"
+        volumes:
+            -   ./weights:/weights
         environment:
             - RESPONSE_URL=
         deploy:
