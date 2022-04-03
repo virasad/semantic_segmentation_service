@@ -1,4 +1,12 @@
+imantics==0.1.12
 uvicorn==0.17.6
 fastapi==0.75.1
 lightning-flash[image]
 opencv-python==4.5.5.64
+pycocotools==2.0.4
+torchmetrics==0.7.3
+matplotlib==3.5.1
+numpy==1.22.3
+Pillow==9.1.0
+tqdm==4.63.1
+requests==2.27.1
