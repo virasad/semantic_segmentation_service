@@ -7,7 +7,7 @@ import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
 
-from inference.predict import InferenceSeg
+from predict import InferenceSeg
 
 app = FastAPI()
 detector = InferenceSeg(100)
