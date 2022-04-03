@@ -13,14 +13,16 @@ labels_path = "/dataset/coco/masks/"
 labels_json_path = "/home/amir/Projects/rutilea_singularity_gear_inspection/backbone/dataset/coco/result.json"
 
 
-def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100):
+def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100,
+                           num_classes=2, validation_split=0.2):
     """
     :param images_path: images should be in png format
     :param masks_path: mask path should be raw image and in png format
     :return:
     """
     datamodule = dataloader.get_dataset_for_flash(images_path, masks_path, batch_size,
-                                                  num_workers=num_dataloader_workers)
+                                                  num_workers=num_dataloader_workers, num_classes=num_classes,
+                                                  validation_split=validation_split)
     # 2. Build the task
     model = SemanticSegmentation(
         backbone="deeplabv3plus",
@@ -77,7 +79,8 @@ def train_from_coco(images_path, json_annotation_path, save_name, batch_size=4, 
         os.mkdir(pngmasks_path)
 
     dataset.CocoHandler(json_annotation_path, images_path).convert_dataset_to_masks(pngmasks_path)
-    result = train_from_images_mask(png_images_path, pngmasks_path, save_name, batch_size, num_dataloader_workers, epochs)
+    result = train_from_images_mask(png_images_path, pngmasks_path, save_name, batch_size, num_dataloader_workers,
+                                    epochs)
     return result
 
 
