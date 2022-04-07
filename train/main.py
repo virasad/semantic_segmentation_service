@@ -1,11 +1,12 @@
+import os
 from typing import Optional
 
-from fastapi import FastAPI
-from pydantic import BaseModel
-import train as tr
-import os
 import requests
 import uvicorn
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+import train as tr
 
 app = FastAPI()
 
@@ -17,13 +18,16 @@ class Train(BaseModel):
     batch_size: Optional[int] = None
     num_dataloader_workers: Optional[int] = None
     epochs: Optional[int] = None
+    num_classes: int = 2
+    validation_split: float = 0.2
 
 
 @app.post("/train/")
 def read_train(train: Train = None):
     try:
         result = tr.train_from_coco(train.images, train.annotation, train.save_name, train.batch_size,
-                                    train.num_dataloader_workers, train.epochs)
+                                    train.num_dataloader_workers, train.epochs, train.num_classes,
+                                    train.validation_split)
 
         response_url = os.environ.get('RESPONSE_URL')
         requests.post(response_url, json={'result': result})

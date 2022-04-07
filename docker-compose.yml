@@ -6,6 +6,8 @@ services:
         ports:
             - '8000:8000'
         command: "python3 main.py"
+        environment:
+            - LOGGER_URL=
         deploy:
             resources:
                 reservations:
