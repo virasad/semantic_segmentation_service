@@ -1,8 +1,10 @@
 FROM pytorchlightning/pytorch_lightning:latest
 
-RUN apt-get update && apt-get install -y python3-opencv
+RUN pip install lightning-flash[image]
+RUN pip install opencv-python
+RUN pip install uvicorn
+RUN pip install fastapi
 
 WORKDIR /code/
 COPY . /code/
 
-RUN pip install -r requirements.txt
