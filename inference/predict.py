@@ -2,7 +2,6 @@ import warnings
 
 import cv2
 import imantics
-import matplotlib
 import numpy as np
 from PIL import Image
 from flash import Trainer
@@ -16,7 +15,6 @@ warnings.filterwarnings("ignore", ".*Default upsampling behavior when*")
 
 class InferenceSeg:
     def __init__(self, num_classes):
-        matplotlib.use('TkAgg')
         self.trainer = Trainer()
         self.num_classes = num_classes
         self.label_map = dict(zip(range(2), [(0, 0, 0), (0, 0, 255)]))
