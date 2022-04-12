@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from predict import InferenceSeg
+import os
 
 app = FastAPI()
 detector = InferenceSeg(100)
@@ -40,9 +41,10 @@ def predict(predict: Predict):
         result = detector.result_to_polygon(result)
         result = json.dumps(result)
         return result
+        
     except Exception as e:
         return {"result": "failed", 'error': str(e)}
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=8000)
+    uvicorn.run(app, host='127.0.0.1', port=int(os.environ.get('PORT', '5556')))
