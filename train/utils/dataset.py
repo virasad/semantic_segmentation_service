@@ -6,6 +6,8 @@ import numpy as np
 from PIL import Image
 from pycocotools.coco import COCO
 from tqdm import tqdm
+from pathlib import Path
+
 
 dataset_path = '/dataset/coco'
 
@@ -29,9 +31,11 @@ class CocoHandler:
 
     def convert_dataset_to_masks(self, dst_mask_path):
         for image_id in tqdm(self.ids, desc='Converting coco annotation to masks'):
+
             mask, file_name = self.coco_to_mask(image_id)
             mask = mask.astype(np.uint8)
-            cv2.imwrite(os.path.join(dst_mask_path, file_name).replace('.jpg', '.png'), mask)
+            ext = os.path.splitext(file_name)[1]
+            cv2.imwrite(os.path.join(dst_mask_path, file_name).replace(ext, '.png'), mask)
 
     def generate_label_map(self):
         label_map = {}
@@ -50,8 +54,11 @@ def check_dataset(input_data, target_data):
 
 
 def batch_jpg_to_png(images_path):
-    for img_path in tqdm(glob(images_path + '/*.jpg'), desc='Converting jpg to png'):
-        dst_path = img_path.replace('images', 'pngimages').replace('.jpg', '.png')
+    print('start jpg to png')
+    for img_path in tqdm(glob(os.path.join(images_path ,'*.*')), desc='Converting images to png'):
+        # get image extension
+        ext = os.path.splitext(img_path)[1]
+        dst_path = img_path.replace('images', 'pngimages').replace(ext, '.png')
         jpg_to_png(img_path, dst_path)
 
 

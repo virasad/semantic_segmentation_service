@@ -1,13 +1,17 @@
 version: "3.8"
 services:
     inference:
+        network_mode: host
         container_name: "semantic-segment-inference"
         build: "./inference"
-        ports:
-            - '8000:8000'
         command: "python3 main.py"
+        # ports:
+        #     - "5553:5553"
+        volumes:
+            - ./weights:/weights
+
         environment:
-            - LOGGER_URL=
+            - PORT=5556
         deploy:
             resources:
                 reservations:
@@ -15,15 +19,20 @@ services:
                         - capabilities: [gpu]
 
     train:
+        network_mode: host
         container_name: "semantic-segment-train"
         build: "./train"
-        ports:
-            - '5000:5000'
         command: "python3 main.py"
+        # ports:
+        #     - "5554:5554"
         volumes:
             -   ./weights:/weights
+            -   ./dataset:/dataset
         environment:
-            - RESPONSE_URL=
+            - RESPONSE_URL=http://127.0.0.1:8000/api/v1/train/done
+            - LOGGER_URL=http://127.0.0.1:8000/logger
+            - PORT=5554
+            - IS_LOGGER_ON=False
         deploy:
             resources:
                 reservations:

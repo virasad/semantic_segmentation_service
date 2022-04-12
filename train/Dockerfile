@@ -1,10 +1,7 @@
 FROM pytorchlightning/pytorch_lightning:latest
-
-RUN pip install lightning-flash[image]
-RUN pip install opencv-python
-RUN pip install uvicorn
-RUN pip install fastapi
+RUN apt-get update
+RUN apt-get install ffmpeg libsm6 libxext6  -y
 
 WORKDIR /code/
 COPY . /code/
-
+RUN pip install -r requirements.txt
