@@ -8,6 +8,7 @@ from flash import Trainer
 from flash.image import SemanticSegmentation, SemanticSegmentationData
 
 from utils.postprocess import SegmentationLabelsOutput
+import torch
 
 warnings.filterwarnings("ignore", ".*does not have many workers.*")
 warnings.filterwarnings("ignore", ".*Default upsampling behavior when*")
@@ -15,7 +16,7 @@ warnings.filterwarnings("ignore", ".*Default upsampling behavior when*")
 
 class InferenceSeg:
     def __init__(self, num_classes):
-        self.trainer = Trainer()
+        self.trainer = Trainer(gpus=torch.cuda.device_count())
         self.num_classes = num_classes
         self.label_map = dict(zip(range(2), [(0, 0, 0), (0, 0, 255)]))
 
