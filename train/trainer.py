@@ -37,7 +37,6 @@ def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num
                            mdmc_average='samplewise'),
                  Recall(num_classes=datamodule.num_classes, mdmc_average='samplewise')],
     )
-    print('bale bale')
     # 3. Create the trainer and finetune the model
     trainer = flash.Trainer(
         max_epochs=epochs, logger=logger.ClientLogger(), gpus=torch.cuda.device_count())

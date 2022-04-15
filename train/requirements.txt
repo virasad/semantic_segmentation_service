@@ -1,6 +1,7 @@
 imantics==0.1.12
 uvicorn==0.17.6
 fastapi==0.75.1
+lightning-flash
 lightning-flash[image]
 opencv-python==4.5.5.64
 pycocotools==2.0.4

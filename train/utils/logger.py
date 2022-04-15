@@ -31,7 +31,7 @@ class ClientLogger(LightningLoggerBase):
         print(f"Logging step: {step}")
         metrics['step'] = step
         print(f"Logging metrics: {metrics}")
-        if os.environ.get('IS_LOGGER_ON'):
+        if os.environ.get('IS_LOGGER_ON') in ('true', 'True', '1'):
             requests.post(os.environ.get('LOGGER_URL', False), data=json.dumps(metrics))
 
 
