@@ -33,6 +33,7 @@ def set_model(model_path: ModelPath):
 
 @app.post('/predict/')
 def predict(predict: Predict):
+    print('Predicting...')
     try:
         image = cv2.imdecode(np.frombuffer(base64.b64decode(predict.image.encode('utf-8')), dtype=np.uint8),
                              cv2.IMREAD_COLOR)
@@ -47,4 +48,4 @@ def predict(predict: Predict):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=int(os.environ.get('PORT', '5556')))
+    uvicorn.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', '5556')))
