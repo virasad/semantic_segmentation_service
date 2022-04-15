@@ -1,17 +1,18 @@
 version: "3.8"
 services:
     inference:
-        network_mode: host
+        # network_mode: host
         container_name: "semantic-segment-inference"
         build: "./inference"
         command: "python3 main.py"
-        # ports:
-        #     - "5553:5553"
+        ports:
+            - "5553:5553"
         volumes:
             - ./weights:/weights
 
         environment:
             - PORT=5556
+            - WEIGHTS_DIR=/weights
         deploy:
             resources:
                 reservations:
@@ -19,12 +20,12 @@ services:
                         - capabilities: [gpu]
 
     train:
-        network_mode: host
+        # network_mode: host
         container_name: "semantic-segment-train"
         build: "./train"
         command: "python3 main.py"
-        # ports:
-        #     - "5554:5554"
+        ports:
+            - "5554:5554"
         volumes:
             -   ./weights:/weights
             -   ./dataset:/dataset
