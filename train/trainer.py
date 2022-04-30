@@ -15,7 +15,7 @@ labels_json_path = "/home/amir/Projects/rutilea_singularity_gear_inspection/back
 
 
 def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100,
-                           num_classes=2, validation_split=0.2):
+                           num_classes=2, validation_split=0.2, backbone="mobilenet_v2", head="deeplabv3plus"):
     """
     :param images_path: images should be in png format
     :param masks_path: mask path should be raw image and in png format
@@ -26,8 +26,8 @@ def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num
                                                   validation_split=validation_split)
     # 2. Build the task
     model = SemanticSegmentation(
-        backbone="mobilenet_v2",
-        head='deeplabv3plus',
+        backbone=backbone,
+        head=head,
         num_classes=datamodule.num_classes,
         metrics=[IoU(num_classes=datamodule.num_classes),
                  F1(num_classes=datamodule.num_classes, mdmc_average='samplewise'),
@@ -41,13 +41,15 @@ def train_from_images_mask(images_path, masks_path, save_name, batch_size=4, num
     trainer = flash.Trainer(
         max_epochs=epochs, logger=logger.ClientLogger(), gpus=torch.cuda.device_count())
     trainer.finetune(model, datamodule=datamodule, strategy="no_freeze")
-    trainer.save_checkpoint(os.path.join(os.environ.get('WEIGHTS_DIR','/weights'),"{}_model.pt".format(save_name)))
+    trainer.save_checkpoint(os.path.join(os.environ.get('WEIGHTS_DIR', '/weights'), "{}_model.pt".format(save_name)))
     result = trainer.validate(model, datamodule=datamodule)
 
     return result[0]
 
 
-def train_from_coco(images_path, json_annotation_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100, num_classes=2, validation_split=0.2):
+def train_from_coco(images_path, json_annotation_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100,
+                    num_classes=2,
+                    validation_split=0.2, backbone="mobilenet_v2", head="deeplabv3plus"):
     """
 
     :param images_path: jpg or png images path
@@ -61,8 +63,7 @@ def train_from_coco(images_path, json_annotation_path, save_name, batch_size=4, 
 
     # check files exist
 
-
-    # list files in dir 
+    # list files in dir
     if not os.path.exists(images_path):
         raise FileExistsError("images path not found")
     if not os.path.exists(json_annotation_path):
@@ -88,7 +89,7 @@ def train_from_coco(images_path, json_annotation_path, save_name, batch_size=4, 
                         images_path).convert_dataset_to_masks(pngmasks_path)
     print('dataset convert to masks')
     result = train_from_images_mask(png_images_path, pngmasks_path, save_name, batch_size, num_dataloader_workers,
-                                    epochs, num_classes=2, validation_split=0.2)
+                                    epochs, num_classes, validation_split, backbone, head)
     return result
 
 

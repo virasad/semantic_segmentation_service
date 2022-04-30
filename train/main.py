@@ -5,11 +5,16 @@ import requests
 import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
+import torch
 
 import trainer as tr
 
 app = FastAPI()
 
+train_models = {
+    "backbone": "mobilenet_v2",
+    "head": "deeplabv3plus"
+}
 
 class Train(BaseModel):
     images: str
@@ -22,14 +27,31 @@ class Train(BaseModel):
     num_classes: str = 2
     validation_split: str = 0.2
 
+class SetModel(BaseModel):
+    backbone: str
+    head: str
+
+@app.post("/set_models")
+def set_models(model: SetModel):
+    if os.path.exists(model.backbone):
+        train_models["backbone"] = torch.load(model.backbone)
+    else:
+        train_models["backbone"] = model.backbone
+
+    if os.path.exists(model.head):
+        train_models["head"] = torch.load(model.head)
+    else:
+        train_models["head"] = model.head
+
 
 @app.post("/train/")
 def read_train(train: Train = None):
     try:
         result = tr.train_from_coco(train.images, train.annotation, train.save_name, int(train.batch_size),
                                     int(train.num_dataloader_workers), int(train.epochs), int(train.num_classes),
-                                    float(train.validation_split))
-        response_url = os.environ.get('RESPONSE_URL','http://127.0.0.1:8000/api/v1/train/done')
+                                    float(train.validation_split),
+                                    train_models["backbone"], train_models["head"])
+        response_url = os.environ.get('RESPONSE_URL', 'http://127.0.0.1:8000/api/v1/train/done')
         a = requests.post(response_url, data={**result, **train.extra_kwargs, 'save_name': train.save_name +'_model.pt'})
         print(a.text)
         return result
