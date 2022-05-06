@@ -26,12 +26,15 @@ class Train(BaseModel):
     epochs: Optional[str] = None
     num_classes: str = 2
     validation_split: str = 0.2
+    pretrained_path: Optional[str] = None
+    is_augment: Optional[bool] = None
+    augment_params: Optional[dict] = None
 
 class SetModel(BaseModel):
     backbone: str
     head: str
 
-@app.post("/set_models")
+@app.post("/set_models/")
 def set_models(model: SetModel):
     if os.path.exists(model.backbone):
         train_models["backbone"] = torch.load(model.backbone)
@@ -43,14 +46,18 @@ def set_models(model: SetModel):
     else:
         train_models["head"] = model.head
 
-
 @app.post("/train/")
 def read_train(train: Train = None):
     try:
-        result = tr.train_from_coco(train.images, train.annotation, train.save_name, int(train.batch_size),
+        trainer = tr.SemanticSegmentTrainer(backbone = train_models["backbone"],
+                             head = train_models["head"],
+                             pre_trained_path = train.pretrained_path,
+                             is_augment = train.is_augment,
+                             augment_params = train.augment_params,
+                             )
+        result = trainer.train_from_coco(train.images, train.annotation, train.save_name, int(train.batch_size),
                                     int(train.num_dataloader_workers), int(train.epochs), int(train.num_classes),
-                                    float(train.validation_split),
-                                    train_models["backbone"], train_models["head"])
+                                    float(train.validation_split))
         response_url = os.environ.get('RESPONSE_URL', 'http://127.0.0.1:8000/api/v1/train/done')
         a = requests.post(response_url, data={**result, **train.extra_kwargs, 'save_name': train.save_name +'_model.pt'})
         print(a.text)
@@ -61,4 +68,4 @@ def read_train(train: Train = None):
 
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', '5554')))
+    uvicorn.run(app, host='127.0.0.1', port=int(os.environ.get('PORT', '5554')))
