@@ -34,19 +34,9 @@ class SetModel(BaseModel):
     backbone: str
     head: str
 
-@app.post("/set_models/")
-def set_models(model: SetModel):
-    if os.path.exists(model.backbone):
-        train_models["backbone"] = torch.load(model.backbone)
-    else:
-        train_models["backbone"] = model.backbone
 
-    if os.path.exists(model.head):
-        train_models["head"] = torch.load(model.head)
-    else:
-        train_models["head"] = model.head
 
-@app.post("/train/")
+@app.post("/train")
 def read_train(train: Train = None):
     try:
         trainer = tr.SemanticSegmentTrainer(backbone = train_models["backbone"],
@@ -67,5 +57,5 @@ def read_train(train: Train = None):
         return {"result": "failed", 'error': str(e)}
 
 
-if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=int(os.environ.get('PORT', '5554')))
+# if __name__ == '__main__':
+#     uvicorn.run(app, host='127.0.0.1', port=int(os.environ.get('PORT', '5554')))
