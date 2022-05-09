@@ -64,8 +64,8 @@ class Augmentor:
 
 
 
-    def auto_augment(self, quantity, resize=False, width=0, height=0):
-
+    def auto_augment(self, quantity = 100, resize=False, width=0, height=0):
+        print('augment started')
         images_list = os.listdir(self.images_path)
         images_list.sort()
 
@@ -79,7 +79,7 @@ class Augmentor:
             image_path = os.path.join(self.images_path, image_name)
             mask_path = os.path.join(self.masks_path, image_name)
 
-            for _ in range(quantity):
+            for _ in tqdm(range(quantity)):
                 image, mask = self.new_augment(image_path, mask_path)
                 new_image_path = os.path.join(self.new_images_path, f'{self._file_counter}.png')
                 new_mask_path = os.path.join(self.new_masks_path, f'{self._file_counter}.png')
