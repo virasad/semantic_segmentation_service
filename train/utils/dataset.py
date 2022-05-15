@@ -22,6 +22,7 @@ class CocoHandler:
     def coco_to_mask(self, image_id):
         image_info = self.coco.loadImgs(image_id)[0]
         cat_ids = self.coco.getCatIds()
+        print('cat ids is')
         anns_ids = self.coco.getAnnIds(imgIds=image_info['id'], catIds=cat_ids, iscrowd=None)
         anns = self.coco.loadAnns(anns_ids)
         anns_img = np.zeros((image_info['height'], image_info['width']))
@@ -31,11 +32,14 @@ class CocoHandler:
 
     def convert_dataset_to_masks(self, dst_mask_path):
         for image_id in tqdm(self.ids, desc='Converting coco annotation to masks'):
-
-            mask, file_name = self.coco_to_mask(image_id)
-            mask = mask.astype(np.uint8)
-            ext = os.path.splitext(file_name)[1]
-            cv2.imwrite(os.path.join(dst_mask_path, file_name).replace(ext, '.png'), mask)
+            try:
+                mask, file_name = self.coco_to_mask(image_id)
+                mask = mask.astype(np.uint8)
+                ext = os.path.splitext(file_name)[1]
+                cv2.imwrite(os.path.join(dst_mask_path, file_name).replace(ext, '.png'), mask)
+            except Exception as e:
+                print(e)
+                continue
 
     def generate_label_map(self):
         label_map = {}
