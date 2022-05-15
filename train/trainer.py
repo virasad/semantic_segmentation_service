@@ -7,7 +7,7 @@ from flash.image import SemanticSegmentation
 from torchmetrics import IoU, F1, Accuracy, Precision, Recall
 from utils.augment import Augmentor
 
-from utils import dataloader, logger, dataset
+from utils import dataloader, logger, dataset, utils
 from glob import glob
 
 data_path = '/home/amir/Projects/rutilea_singularity_gear_inspection/backbone/dataset/coco/images'
@@ -108,6 +108,7 @@ class SemanticSegmentTrainer:
         if not os.path.exists(images_path):
             raise FileExistsError("images path not found")
         if not os.path.exists(json_annotation_path):
+            print(json_annotation_path)
             raise FileExistsError("json annotation path not found")
 
         png_images_path = images_path.replace("images", "pngimages")
@@ -134,6 +135,8 @@ class SemanticSegmentTrainer:
             png_images_path, pngmasks_path = self.augment(
                 png_images_path, pngmasks_path, self.augment_params)
 
+        utils.remove_overuse_image_in_path(png_images_path, pngmasks_path)
+        utils.check_mask_with_cv(png_images_path, pngmasks_path)
         result = self.train_from_images_mask(png_images_path, pngmasks_path, save_name, batch_size, num_dataloader_workers,
                                              epochs, num_classes, validation_split)
         return result
