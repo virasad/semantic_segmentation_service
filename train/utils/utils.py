@@ -21,11 +21,11 @@ def check_mask_with_cv(images_dir, mask_dir):
         mask_name = os.path.basename(mask_file)
         image_file = os.path.join(images_dir, mask_name)
         # image = cv2.imread(image_file)
-        try:
-            print('open image', image_file)
-            image = cv2.imread(image_file)
-            mask = cv2.imread(mask_file)
-        except:
+
+        print('open image', image_file)
+        image = cv2.imread(image_file)
+        mask = cv2.imread(mask_file)
+        if not image and not mask:
             print(mask_file)
             os.remove(mask_file)
             os.remove(image_file)

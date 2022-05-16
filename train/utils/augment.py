@@ -5,7 +5,6 @@ from tqdm import tqdm
 
 def get_filters():
     filters_of_aug = [
-
         A.ShiftScaleRotate(scale_limit=0.5, rotate_limit=0,
                            shift_limit=0.1, p=1, border_mode=0),
         A.RandomRotate90(p=0.2),
