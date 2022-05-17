@@ -96,7 +96,7 @@ class SemanticSegmentTrainer:
 
         return result[0]
 
-    def train_from_coco(self, images_path, annotation_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100,
+    def train(self, images_path, annotation_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100,
                         num_classes=2,
                         validation_split=0.2):
         """
