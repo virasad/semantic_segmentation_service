@@ -36,7 +36,8 @@ class CocoHandler:
                 mask, file_name = self.coco_to_mask(image_id)
                 mask = mask.astype(np.uint8)
                 ext = os.path.splitext(file_name)[1]
-                cv2.imwrite(os.path.join(dst_mask_path, file_name).replace(ext, '.png'), mask)
+                if mask:
+                    cv2.imwrite(os.path.join(dst_mask_path, file_name).replace(ext, '.png'), mask)
             except Exception as e:
                 print(e)
                 continue
@@ -68,7 +69,8 @@ def batch_jpg_to_png(images_path):
 
 def jpg_to_png(path, dst_path):
     img = Image.open(path)
-    img.save(dst_path)
+    if img:
+        img.save(dst_path)
 
 
 def main():

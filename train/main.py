@@ -19,6 +19,8 @@ train_models = {
 class Train(BaseModel):
     images: str
     annotation: str
+    data_type : str
+    labelmap : Optional[str] = None
     save_name: Optional[str] = None
     batch_size: Optional[str] = None
     extra_kwargs: Optional[dict] = None
@@ -41,9 +43,11 @@ def read_train(train: Train = None):
     try:
         trainer = tr.SemanticSegmentTrainer(backbone = train_models["backbone"],
                              head = train_models["head"],
+                             data_type=train.data_type,
                              pre_trained_path = train.pretrained_path,
                              is_augment = train.is_augment,
                              augment_params = train.augment_params,
+                             label_map=train.labelmap
                              )
         result = trainer.train_from_coco(train.images, train.annotation, train.save_name, int(train.batch_size),
                                     int(train.num_dataloader_workers), int(train.epochs), int(train.num_classes),

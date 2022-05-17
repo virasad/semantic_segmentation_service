@@ -7,7 +7,7 @@ from flash.image import SemanticSegmentation
 from torchmetrics import IoU, F1, Accuracy, Precision, Recall
 from utils.augment import Augmentor
 
-from utils import dataloader, logger, dataset, utils
+from utils import dataloader, logger, utils, datahandler
 from glob import glob
 
 data_path = '/home/amir/Projects/rutilea_singularity_gear_inspection/backbone/dataset/coco/images'
@@ -16,14 +16,17 @@ labels_json_path = "/home/amir/Projects/rutilea_singularity_gear_inspection/back
 
 
 class SemanticSegmentTrainer:
-    def __init__(self, backbone, head, pre_trained_path=None, is_augment=False, augment_params=None):
+    def __init__(self, backbone, head, data_type, pre_trained_path=None, is_augment=False, augment_params=None, label_map=None):
         self.head = head
         self.backbone = backbone
         self.pre_trained_path = pre_trained_path
         self.is_augment = is_augment
         self.augment_params = augment_params
+        self.labelmap=label_map
+        self.data_type = data_type
 
     def augment(self, images_path, masks_path, augment_params):
+
         try:
             os.mkdir('/dataset/temp')
         except FileExistsError:
@@ -54,6 +57,11 @@ class SemanticSegmentTrainer:
         :param masks_path: mask path should be raw image and in png format
         :return:
         """
+        if self.is_augment:
+            images_path, masks_path = self.augment(images_path, masks_path, self.augment_params)
+
+        utils.remove_overuse_image_in_path(images_path, masks_path)
+        utils.check_mask_with_cv(images_path, masks_path)
 
         datamodule = dataloader.get_dataset_for_flash(images_path, masks_path, batch_size,
                                                       num_workers=num_dataloader_workers, num_classes=num_classes,
@@ -88,11 +96,10 @@ class SemanticSegmentTrainer:
 
         return result[0]
 
-    def train_from_coco(self, images_path, json_annotation_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100,
+    def train_from_coco(self, images_path, annotation_path, save_name, batch_size=4, num_dataloader_workers=8, epochs=100,
                         num_classes=2,
                         validation_split=0.2):
         """
-
         :param images_path: jpg or png images path
         :param json_annotation_path: coco dataset annotation path
         :param save_name: save weight name ( you can add time to it)
@@ -102,42 +109,14 @@ class SemanticSegmentTrainer:
         :return: {"result": "staus", "error": "error message"}
         """
 
-        # check files exist
+        if self.data_type in ["coco", "COCO"]:
+            images_path, masks_path = datahandler.coco_data(images_path, annotation_path)
+        elif self.data_type in ['pascal', 'pascal_voc', 'pascal-voc']:
+            images_path, masks_path, num_classes = datahandler.pascal_voc_data(images_path, annotation_path, self.labelmap)
+        else:
+            raise ValueError("Data type not supported")
 
-        # list files in dir
-        if not os.path.exists(images_path):
-            raise FileExistsError("images path not found")
-        if not os.path.exists(json_annotation_path):
-            print(json_annotation_path)
-            raise FileExistsError("json annotation path not found")
-
-        png_images_path = images_path.replace("images", "pngimages")
-        try:
-            os.mkdir(png_images_path)
-        except FileExistsError:
-            shutil.rmtree(png_images_path)
-            os.mkdir(png_images_path)
-
-        dataset.batch_jpg_to_png(images_path)
-        pngmasks_path = images_path.replace("images", "pngmasks")
-        try:
-            os.mkdir(pngmasks_path)
-
-        except FileExistsError:
-            shutil.rmtree(pngmasks_path)
-            os.mkdir(pngmasks_path)
-
-        dataset.CocoHandler(json_annotation_path,
-                            images_path).convert_dataset_to_masks(pngmasks_path)
-        print('dataset convert to masks')
-
-        if self.is_augment:
-            png_images_path, pngmasks_path = self.augment(
-                png_images_path, pngmasks_path, self.augment_params)
-
-        utils.remove_overuse_image_in_path(png_images_path, pngmasks_path)
-        utils.check_mask_with_cv(png_images_path, pngmasks_path)
-        result = self.train_from_images_mask(png_images_path, pngmasks_path, save_name, batch_size, num_dataloader_workers,
+        result = self.train_from_images_mask(images_path, masks_path, save_name, batch_size, num_dataloader_workers,
                                              epochs, num_classes, validation_split)
         return result
 
