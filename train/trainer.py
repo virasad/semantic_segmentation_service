@@ -27,23 +27,9 @@ class SemanticSegmentTrainer:
 
     def augment(self, images_path, masks_path, augment_params):
 
-        try:
-            os.mkdir('/dataset/temp')
-        except FileExistsError:
-            shutil.rmtree('/dataset/temp')
-            os.mkdir('/dataset/temp')
-
-        os.makedirs('/dataset/temp/images')
-        os.makedirs('/dataset/temp/masks')
-
-        for image_path in glob(os.path.join(images_path, '*')):
-            shutil.copy(image_path, '/dataset/temp/images')
-        for mask_path in glob(os.path.join(masks_path, '*')):
-            shutil.copy(mask_path, '/dataset/temp/masks')
-
         os.makedirs('/dataset/temp/augmented')
 
-        aug = Augmentor('/dataset/temp/images', '/dataset/temp/masks', '/dataset/temp/augmented')
+        aug = Augmentor(images_path, masks_path, '/dataset/temp/augmented')
         if augment_params:
             images_path, masks_path = aug.auto_augment(**augment_params)
         else:
@@ -57,6 +43,10 @@ class SemanticSegmentTrainer:
         :param masks_path: mask path should be raw image and in png format
         :return:
         """
+
+        utils.remove_overuse_image_in_path(images_path, masks_path)
+        utils.check_mask_with_cv(images_path, masks_path)
+
         if self.is_augment:
             images_path, masks_path = self.augment(images_path, masks_path, self.augment_params)
 
@@ -108,6 +98,14 @@ class SemanticSegmentTrainer:
         :param epochs: max number of epochs
         :return: {"result": "staus", "error": "error message"}
         """
+
+
+        try:
+            os.mkdir('/dataset/temp')
+        except FileExistsError:
+            shutil.rmtree('/dataset/temp')
+            os.mkdir('/dataset/temp')
+
 
         if self.data_type in ["coco", "COCO"]:
             images_path, masks_path = datahandler.coco_data(images_path, annotation_path)

@@ -58,12 +58,13 @@ def check_dataset(input_data, target_data):
 
 
 
-def batch_jpg_to_png(images_path):
+def batch_jpg_to_png(images_path, dstpath):
     print('start jpg to png')
-    for img_path in tqdm(glob(os.path.join(images_path ,'*.*')), desc='Converting images to png'):
+    for img_path in tqdm(glob(os.path.join(images_path, '*.*')), desc='Converting images to png'):
         # get image extension
         ext = os.path.splitext(img_path)[1]
-        dst_path = img_path.replace('images', 'pngimages').replace(ext, '.png')
+        name = os.path.basename(img_path)
+        dst_path = os.path.join(dstpath, name.replace(ext, '.png'))
         jpg_to_png(img_path, dst_path)
 
 

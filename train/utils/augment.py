@@ -37,6 +37,7 @@ class Augmentor:
         self.filters = get_filters()
         self.images_path = images_path
         self.masks_path = masks_path
+
         if os.path.isdir(os.path.join(save_path, 'images')):
             self.new_images_path = os.path.join(save_path, 'images')
         else:
