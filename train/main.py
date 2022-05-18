@@ -49,7 +49,7 @@ def read_train(train: Train = None):
                              augment_params = train.augment_params,
                              label_map=train.labelmap
                              )
-        result = trainer.train_from_coco(train.images, train.annotation, train.save_name, int(train.batch_size),
+        result = trainer.train(train.images, train.annotation, train.save_name, int(train.batch_size),
                                     int(train.num_dataloader_workers), int(train.epochs), int(train.num_classes),
                                     float(train.validation_split))
         response_url = os.environ.get('RESPONSE_URL', 'http://127.0.0.1:8000/api/v1/train/done')
