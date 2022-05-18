@@ -2,11 +2,9 @@ import os
 from typing import Optional
 
 import requests
-import uvicorn
 from fastapi import FastAPI
 from pydantic import BaseModel
-import torch
-
+import shutil
 import trainer as tr
 
 app = FastAPI()
@@ -55,9 +53,11 @@ def read_train(train: Train = None):
         response_url = os.environ.get('RESPONSE_URL', 'http://127.0.0.1:8000/api/v1/train/done')
         a = requests.post(response_url, data={**result, **train.extra_kwargs, 'save_name': train.save_name +'_model.pt'})
         print(a.text)
+        shutil.rmtree("/dataset/temp")
         return result
 
     except Exception as e:
+        shutil.rmtree("/dataset/temp")
         return {"result": "failed", 'error': str(e)}
 
 
