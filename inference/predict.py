@@ -52,15 +52,20 @@ class InferenceSeg:
         predictions = self.trainer.predict(self.model, datamodule=datamodule)
         return predictions[0][0]
 
-    def predict_image_path_add_image(self, image_path):
+    def predict_image_path_add_image(self, image, mask):
         """
-        :param image_path:
+        :param image
+        :param mask
         :return: BGR Image
         """
-        mask = self.predict(image_path, 1)
-        label_map = SegmentationLabelsOutput.create_random_labels_map(num_classes=100)
-        label_output = SegmentationLabelsOutput(visualize=True, labels_map=label_map)
-        image = cv2.imread(image_path)
+        #mask = self.predict(image_path, 1)
+        label_map = SegmentationLabelsOutput.create_random_labels_map(num_classes=self.num_classes)
+        label_output = SegmentationLabelsOutput(visualize=False, labels_map=label_map, return_mask_as_image=True,
+                                                labels_class=False)
+        mask = label_output.transform(mask)
+        mask = np.array(mask)
+        #image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
         merge_img = cv2.addWeighted(image, 0.5, cv2.cvtColor(mask, cv2.COLOR_RGB2BGR), 0.5, 0, image)
         return merge_img
 
