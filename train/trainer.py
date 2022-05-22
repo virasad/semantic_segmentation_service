@@ -7,6 +7,7 @@ from flash.image import SemanticSegmentation
 from torchmetrics import IoU, F1, Accuracy, Precision, Recall
 from utils.augment import Augmentor
 from sklearn.model_selection import train_test_split
+from pytorch_lightning.loggers import WandbLogger
 
 from utils import dataloader, logger, utils, datahandler
 from glob import glob
@@ -18,7 +19,7 @@ labels_json_path = "/home/amir/Projects/rutilea_singularity_gear_inspection/back
 
 class SemanticSegmentTrainer:
     def __init__(self, backbone, head, data_type, pre_trained_path=None, is_augment=False, augment_params=None,
-                 label_map=None):
+                 label_map=None, logger=None):
         self.head = head
         self.backbone = backbone
         self.pre_trained_path = pre_trained_path
@@ -26,6 +27,7 @@ class SemanticSegmentTrainer:
         self.augment_params = augment_params
         self.labelmap = label_map
         self.data_type = data_type
+        self.logger_name = logger
 
     def augment(self, train_images, train_masks, test_images, test_masks, augment_params):
 
@@ -83,7 +85,6 @@ class SemanticSegmentTrainer:
         validation_images_path = '/dataset/temp/test_images'
         validation_masks_path = '/dataset/temp/test_masks'
 
-
         os.makedirs(train_images_path)
         os.makedirs(train_masks_path)
         os.makedirs(validation_images_path)
@@ -105,7 +106,7 @@ class SemanticSegmentTrainer:
                 test_images=validation_images_path,
                 test_masks=validation_masks_path,
                 augment_params=self.augment_params
-                )
+            )
 
         utils.remove_overuse_image_in_path(train_images_path, train_masks_path)
         utils.check_mask_with_cv(train_images_path, train_masks_path)
@@ -141,9 +142,8 @@ class SemanticSegmentTrainer:
                                 mdmc_average='samplewise')],
             )
         # 3. Create the trainer and finetune the model
-        logger_name= ''
-        if logger_name == 'wandb':
-            loggerm = ''
+        if self.logger_name == 'wandb':
+            loggerm = WandbLogger()
         else:
             loggerm = logger.ClientLogger()
 
