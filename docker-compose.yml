@@ -3,8 +3,8 @@ services:
   inference:
         # network_mode: host
     container_name: "semantic-segment-inference"
-    build: "./semantic_segmentation_service/inference"
-    command: "python3 main.py"
+    build: "./inference"
+    command: "uvicorn main:app --host 0.0.0.0 --port 5553 --reload"
     ports:
         - "5553:5553"
     volumes:
@@ -23,8 +23,8 @@ services:
   train:
       # network_mode: host
     container_name: "semantic-segment-train"
-    build: "./semantic_segmentation_service/train"
-    command: "python3 main.py"
+    build: "./train"
+    command: "uvicorn main:app --host 0.0.0.0 --port 5554 --reload"
     ports:
         - "5554:5554"
     volumes:

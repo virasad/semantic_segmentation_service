@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from predict import InferenceSeg
+from utils import util
 import os
 
 app = FastAPI()
@@ -16,7 +17,8 @@ detector = InferenceSeg(100)
 
 class Predict(BaseModel):
     image: str
-
+    labeled_image: bool = False
+    labelmap_path: str = None
 
 class ModelPath(BaseModel):
     model_path: str
@@ -37,15 +39,22 @@ def predict(predict: Predict):
     try:
         image = cv2.imdecode(np.frombuffer(base64.b64decode(predict.image.encode('utf-8')), dtype=np.uint8),
                              cv2.IMREAD_COLOR)
-        image = np.moveaxis(image, 2, 0)
-        result = detector.predict(image, batch_size=1)
-        result = detector.result_to_polygon(result)
-        result = json.dumps(result)
+        image_ma = np.moveaxis(image, 2, 0)
+        result = detector.predict(image_ma, batch_size=1)
+        result_poly = detector.result_to_polygon(result)
+        if predict.labeled_image:
+            image = util.make_masked_image_from_labelmap(result, image, label_map_path=predict.labelmap_path)
+            _, img_encoded = cv2.imencode('.jpg', image)
+            result_labeled = {}
+            result_labeled['labeled_image'] = base64.b64encode(img_encoded).decode('utf-8')
+            result_labeled['result'] = result_poly
+            return json.dumps(result_labeled)
+
+        result = json.dumps(result_poly)
         return result
-        
+
     except Exception as e:
         return {"result": "failed", 'error': str(e)}
 
-
-if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', '5556')))
+# if __name__ == '__main__':
+#     uvicorn.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', '5556')))
