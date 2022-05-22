@@ -29,6 +29,7 @@ class Train(BaseModel):
     pretrained_path: Optional[str] = None
     is_augment: Optional[bool] = None
     augment_params: Optional[dict] = None
+    logger: Optional[str] = None
 
 class SetModel(BaseModel):
     backbone: str
@@ -45,7 +46,8 @@ def read_train(train: Train = None):
                              pre_trained_path = train.pretrained_path,
                              is_augment = train.is_augment,
                              augment_params = train.augment_params,
-                             label_map=train.labelmap
+                             label_map=train.labelmap,
+                             logger=train.logger
                              )
         result = trainer.train(train.images, train.annotation, train.save_name, int(train.batch_size),
                                     int(train.num_dataloader_workers), int(train.epochs), int(train.num_classes),

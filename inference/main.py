@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from predict import InferenceSeg
+from utils import util
 import os
 
 app = FastAPI()
@@ -17,6 +18,7 @@ detector = InferenceSeg(100)
 class Predict(BaseModel):
     image: str
     labeled_image: bool = False
+    labelmap_path: str = None
 
 class ModelPath(BaseModel):
     model_path: str
@@ -41,7 +43,7 @@ def predict(predict: Predict):
         result = detector.predict(image_ma, batch_size=1)
         result_poly = detector.result_to_polygon(result)
         if predict.labeled_image:
-            image = detector.predict_image_path_add_image(image, mask=result)
+            image = util.make_masked_image_from_labelmap(result, image, label_map_path=predict.labelmap_path)
             _, img_encoded = cv2.imencode('.jpg', image)
             result_labeled = {}
             result_labeled['labeled_image'] = base64.b64encode(img_encoded).decode('utf-8')
