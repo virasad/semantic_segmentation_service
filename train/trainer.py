@@ -10,7 +10,6 @@ from sklearn.model_selection import train_test_split
 from pytorch_lightning.loggers import WandbLogger
 
 from utils import dataloader, logger, utils, datahandler
-from glob import glob
 
 data_path = '/home/amir/Projects/rutilea_singularity_gear_inspection/backbone/dataset/coco/images'
 labels_path = "/dataset/coco/masks/"
@@ -55,6 +54,11 @@ class SemanticSegmentTrainer:
 
         all_masks_list = os.listdir(masks_path)
         all_masks_list.sort()
+
+        min_length = min(len(all_images_list), len(all_masks_list))
+
+        all_masks_list = all_masks_list[:min_length]
+        all_images_list = all_images_list[:min_length]
 
         all_images_list = [os.path.join(images_path, x) for x in all_images_list]
         all_masks_list = [os.path.join(masks_path, x) for x in all_masks_list]

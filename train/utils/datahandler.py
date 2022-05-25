@@ -5,7 +5,6 @@ from tqdm import tqdm
 import cv2
 import numpy as np
 
-
 def coco_data(images_path, json_annotation_path):
     # list files in dir
     if not os.path.exists(images_path):
