@@ -21,8 +21,24 @@ pip install -r requirements.txt
 ```
 
 # How to run?
+## run from script
+
+```bash
+uvicorn main:app --reload
+```
+## See API doc
+http://127.0.0.1:8000/docs
 
 ## Send Request
+### Send request to predict image
+```json
+{
+    "image": "base62 encoded image",
+    "labeled_image" : "If True then return segmented image",
+    "labelmap_path" : "Path to labelmap.txt", -required if labeled_image is True
+}
+```
+### Python Example
 ```python
 import requests
 base64image = ''
@@ -33,6 +49,14 @@ print(r.json())
 
 ```
 ## Set Model
+### Send request to set model
+```json
+{
+  "model_path": "./path/to/model.pth"
+}
+```
+
+### Python Example
 ```python
 import requests
 url = 'http://localhost:8000/set_model'
@@ -40,8 +64,4 @@ model_path = './model/model.pth'
 data = {'model_path': model_path}
 r = requests.post(url, json=data)
 print(r.json())
-```
-## Run from command line
-```bash
-python main.py
 ```

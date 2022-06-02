@@ -19,3 +19,5 @@ docker compose up
 **For more details about the training please refer to the [README.md](train/readme.md) file.**
 
 **For more details about the inference please refer to the [README.md](inference/readme.md) file.**
+
+![Docker Compose CI](https://github.com/virasad/semantic_segmentation_service/actions/workflows/docker-image.yml/badge.svg)
