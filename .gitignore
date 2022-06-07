@@ -2,3 +2,4 @@ dataset
 weights
 __pycache__
 *.ckpt
+carla-capture-20180513A

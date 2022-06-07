@@ -1,4 +1,4 @@
-import dataset
+from . import dataset
 import os
 import shutil
 from tqdm import tqdm
@@ -72,7 +72,7 @@ def pascal_voc_data(images_path, annotation_path, labelmap_path):
     class_index = []
     class_color = []
 
-    for idx, labelmap in enumerate(labelmaps[1:]):
+    for idx, labelmap in enumerate(labelmaps):
         class_names.append(labelmap.split(":")[0])
         class_index.append(idx)
         class_color.append(labelmap.split(":")[1])

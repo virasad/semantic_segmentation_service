@@ -2,10 +2,11 @@ import os
 from typing import Optional
 
 import requests
-from fastapi import FastAPI
+from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 import shutil
 import trainer as tr
+
 
 app = FastAPI()
 
@@ -59,6 +60,7 @@ def read_train(train: Train = None):
         return result
 
     except Exception as e:
+        print('error happend',e)
         shutil.rmtree("/dataset/temp")
         return {"result": "failed", 'error': str(e)}
 
