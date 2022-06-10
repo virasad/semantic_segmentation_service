@@ -14,6 +14,8 @@ services:
     environment:
         - PORT=5556
         - WEIGHTS_DIR=/weights
+    ipc: host
+    shm_size: 1024M
     deploy:
         resources:
             reservations:
@@ -36,6 +38,8 @@ services:
         - LOGGER_URL=http://127.0.0.1:8000/logger
         - PORT=5554
         - IS_LOGGER_ON=False
+    ipc: host
+    shm_size: 1024M
     deploy:
         resources:
             reservations:
