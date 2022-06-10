@@ -5,6 +5,7 @@ from tqdm import tqdm
 import cv2
 import numpy as np
 
+
 def coco_data(images_path, json_annotation_path):
     # list files in dir
     if not os.path.exists(images_path):
@@ -34,13 +35,15 @@ def coco_data(images_path, json_annotation_path):
 
 
 def pascal_voc_data(images_path, annotation_path, labelmap_path):
+    dataset_path = os.path.dirname(images_path)
+    converted_mask_p =os.path.join(dataset_path, "temp/converted_masks")
     try:
-        os.makedirs("/dataset/temp/converted_masks")
+        os.makedirs(converted_mask_p)
     except FileExistsError:
-        shutil.rmtree("/dataset/temp/converted_masks")
-        os.makedirs("/dataset/temp/converted_masks")
+        shutil.rmtree(converted_mask_p)
+        os.makedirs(converted_mask_p)
 
-    png_images_path = "/dataset/temp/pngimages"
+    png_images_path = os.path.join(dataset_path, "temp/pngimages")
     try:
         os.mkdir(png_images_path)
     except FileExistsError:
@@ -49,7 +52,7 @@ def pascal_voc_data(images_path, annotation_path, labelmap_path):
 
     dataset.batch_jpg_to_png(images_path, png_images_path)
 
-    pngmasks_path = "/dataset/temp/pngmasks"
+    pngmasks_path = os.path.join(dataset_path,"temp/pngmasks")
 
     try:
         os.mkdir(pngmasks_path)
@@ -84,14 +87,14 @@ def pascal_voc_data(images_path, annotation_path, labelmap_path):
         mask = cv2.imread(mask_path, 1)
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
 
-        converted_mask = np.zeros((mask.shape[0], mask.shape[1], 3), dtype=np.uint8)
-        converted_mask = cv2.cvtColor(converted_mask, cv2.COLOR_BGR2GRAY)
+        converted_mask = np.zeros((mask.shape[0], mask.shape[1]), dtype=np.uint8)
+        # converted_mask = cv2.cvtColor(converted_mask, cv2.COLOR_BGR2GRAY)
 
         for idx, color in enumerate(class_color):
             color = color.split(",")
             color = [int(x) for x in color]
             converted_mask[np.where((mask == color).all(axis=2))] = class_index[idx]
 
-        cv2.imwrite(os.path.join("/dataset/temp/converted_masks", os.path.basename(mask_path)), converted_mask)
+        cv2.imwrite(os.path.join(converted_mask_p, os.path.basename(mask_path)), converted_mask)
 
-    return images_path, "/dataset/temp/converted_masks", len(class_names)
+    return images_path, converted_mask_p, len(class_names)

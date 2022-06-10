@@ -6,7 +6,7 @@ def get_dataset_for_flash(train_folder, train_target_folder, val_folder, val_tar
         train_folder=train_folder,
         train_target_folder=train_target_folder,
         val_folder=val_folder,
-        transform_kwargs=dict(image_size=(256, 256)),
+        transform_kwargs=dict(image_size=(1280, 1280)),
         val_target_folder=val_target_folder,
         num_classes=num_classes,
         batch_size=batch_size,

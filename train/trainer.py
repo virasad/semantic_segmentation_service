@@ -14,6 +14,10 @@ from utils import dataloader, logger, utils, datahandler
 data_path = '/home/amir/Projects/rutilea_singularity_gear_inspection/backbone/dataset/coco/images'
 labels_path = "/dataset/coco/masks/"
 labels_json_path = "/home/amir/Projects/rutilea_singularity_gear_inspection/backbone/dataset/coco/result.json"
+train_models = {
+    "backbone": "mobilenet_v2",
+    "head": "deeplabv3plus"
+}
 
 
 class SemanticSegmentTrainer:
@@ -35,12 +39,16 @@ class SemanticSegmentTrainer:
         os.makedirs('/dataset/temp/augmented/train')
         os.makedirs('/dataset/temp/augmented/validation')
 
-        aug_train = Augmentor(train_images, train_masks, '/dataset/temp/augmented/train')
-        aug_validation = Augmentor(test_images, test_masks, '/dataset/temp/augmented/validation')
+        aug_train = Augmentor(train_images, train_masks,
+                              '/dataset/temp/augmented/train')
+        aug_validation = Augmentor(
+            test_images, test_masks, '/dataset/temp/augmented/validation')
 
         if augment_params:
-            train_images_path, train_masks_path = aug_train.auto_augment(**augment_params)
-            validation_images_path, validation_masks_path = aug_validation.auto_augment(**augment_params)
+            train_images_path, train_masks_path = aug_train.auto_augment(
+                **augment_params)
+            validation_images_path, validation_masks_path = aug_validation.auto_augment(
+                **augment_params)
         else:
             train_images_path, train_masks_path = aug_train.auto_augment()
             validation_images_path, validation_masks_path = aug_validation.auto_augment()
@@ -60,7 +68,8 @@ class SemanticSegmentTrainer:
         all_masks_list = all_masks_list[:min_length]
         all_images_list = all_images_list[:min_length]
 
-        all_images_list = [os.path.join(images_path, x) for x in all_images_list]
+        all_images_list = [os.path.join(images_path, x)
+                           for x in all_images_list]
         all_masks_list = [os.path.join(masks_path, x) for x in all_masks_list]
 
         train_images, test_images, train_masks, test_masks = train_test_split(all_images_list, all_masks_list,
@@ -84,10 +93,11 @@ class SemanticSegmentTrainer:
         train_images_paths, train_masks_paths, validation_images_paths, validation_masks_paths = self.train_validation_split(
             images_path, masks_path, validation_split)
 
-        train_images_path = '/dataset/temp/train_images'
-        train_masks_path = '/dataset/temp/train_masks'
-        validation_images_path = '/dataset/temp/test_images'
-        validation_masks_path = '/dataset/temp/test_masks'
+        dataset_p = os.path.dirname(images_path)
+        train_images_path = os.path.join(dataset_p,'train_images')
+        train_masks_path = os.path.join(dataset_p,'train_masks')
+        validation_images_path = os.path.join(dataset_p, 'test_images')
+        validation_masks_path = os.path.join(dataset_p,'test_masks')
 
         os.makedirs(train_images_path)
         os.makedirs(train_masks_path)
@@ -95,13 +105,16 @@ class SemanticSegmentTrainer:
         os.makedirs(validation_masks_path)
 
         for f in train_images_paths:
-            shutil.move(f, os.path.join(train_images_path, os.path.basename(f)))
+            shutil.move(f, os.path.join(
+                train_images_path, os.path.basename(f)))
         for f in train_masks_paths:
             shutil.move(f, os.path.join(train_masks_path, os.path.basename(f)))
         for f in validation_images_paths:
-            shutil.move(f, os.path.join(validation_images_path, os.path.basename(f)))
+            shutil.move(f, os.path.join(
+                validation_images_path, os.path.basename(f)))
         for f in validation_masks_paths:
-            shutil.move(f, os.path.join(validation_masks_path, os.path.basename(f)))
+            shutil.move(f, os.path.join(
+                validation_masks_path, os.path.basename(f)))
 
         if self.is_augment:
             train_images_path, train_masks_path, validation_images_path, validation_masks_path = self.augment(
@@ -115,7 +128,8 @@ class SemanticSegmentTrainer:
         utils.remove_overuse_image_in_path(train_images_path, train_masks_path)
         utils.check_mask_with_cv(train_images_path, train_masks_path)
 
-        utils.remove_overuse_image_in_path(validation_images_path, validation_masks_path)
+        utils.remove_overuse_image_in_path(
+            validation_images_path, validation_masks_path)
         utils.check_mask_with_cv(validation_images_path, validation_masks_path)
 
         datamodule = dataloader.get_dataset_for_flash(train_folder=train_images_path,
@@ -172,15 +186,17 @@ class SemanticSegmentTrainer:
         :param epochs: max number of epochs
         :return: {"result": "staus", "error": "error message"}
         """
+        dataset_path = os.path.dirname(images_path)
 
         try:
-            os.mkdir('/dataset/temp')
+            os.mkdir(os.path.join(dataset_path, 'temp'))
         except FileExistsError:
-            shutil.rmtree('/dataset/temp')
-            os.mkdir('/dataset/temp')
+            shutil.rmtree(os.path.join(dataset_path, 'temp'))
+            os.mkdir(os.path.join(dataset_path, 'temp'))
 
         if self.data_type in ["coco", "COCO"]:
-            images_path, masks_path = datahandler.coco_data(images_path, annotation_path)
+            images_path, masks_path = datahandler.coco_data(
+                images_path, annotation_path)
         elif self.data_type in ['pascal', 'pascal_voc', 'pascal-voc']:
             images_path, masks_path, num_classes = datahandler.pascal_voc_data(images_path, annotation_path,
                                                                                self.labelmap)
@@ -192,6 +208,47 @@ class SemanticSegmentTrainer:
         return result
 
 
+def main(data_type, pretrained_path, is_augment, augment_params, logger_name, labelmap_p, images_p, annotation_p, save_name, batch_size, num_dataloader_workers, epochs, num_classes, validation_split):
+    try:
+        trainer = SemanticSegmentTrainer(backbone=train_models["backbone"],
+                                         head=train_models["head"],
+                                         data_type=data_type,
+                                         pre_trained_path=pretrained_path,
+                                         is_augment=is_augment,
+                                         augment_params=augment_params,
+                                         label_map=labelmap_p,
+                                         logger=logger_name
+                                         )
+        result = trainer.train(images_p, annotation_p, save_name, int(batch_size),
+                               int(num_dataloader_workers), int(
+                                   epochs), int(num_classes),
+                               float(validation_split))
+        # shutil.rmtree("/dataset/temp")
+        return result
+
+    except Exception as e:
+        print('error happend', e)
+        # shutil.rmtree("/dataset/temp")
+        return {"result": "failed", 'error': str(e)}
+
+
 if __name__ == '__main__':
     # train_from_coco(data_path, labels_json_path, "coco_train")
-    print()
+    from pathlib import Path
+    data_type = 'pascal'
+    pretrained_path = 'burr_model.pt'
+    is_augment = False
+    augment_params = None
+    logger_name = 'wandb'
+    dataset_p = Path('dataset')
+    images_p = str(dataset_p / 'images')
+    annotation_p = str(dataset_p / 'labels')
+    labelmap_p = str(dataset_p / 'labelmap.txt')
+    save_name = 'burr_model2'
+    batch_size = 1
+    num_dataloader_workers = 8
+    epochs = 500
+    num_classes = 3
+    validation_split = 0.2
+    main(data_type, pretrained_path, is_augment, augment_params, logger_name, labelmap_p, images_p,
+         annotation_p, save_name, batch_size, num_dataloader_workers, epochs, num_classes, validation_split)

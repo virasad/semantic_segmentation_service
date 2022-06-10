@@ -21,8 +21,6 @@ def check_mask_with_cv(images_dir, mask_dir):
         mask_name = os.path.basename(mask_file)
         image_file = os.path.join(images_dir, mask_name)
         # image = cv2.imread(image_file)
-
-        print('open image', image_file)
         try:
             image = cv2.imread(image_file)
             mask = cv2.imread(mask_file)
